@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+package user.v1;
+
+option go_package = "rahulxf.com/rpc-learning/gen/go/user/v1;userpb";
+
+message User {
+    string uuid = 1;
+    string full_name = 2;
+    int64 birth_year = 3;
+    uint32 salary = 4;
+}
