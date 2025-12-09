@@ -1,6 +1,18 @@
-# Documentation: https://docs.buf.build/configuration/v1/buf-gen-yaml
-version: v1
+version: v2
 plugins:
-  - name: go # Synonym with: protoc-gen-<name>
-    out: gen/go
+  - local: protoc-gen-go
+    out: gen
     opt: paths=source_relative
+  - local: protoc-gen-connect-go
+    out: gen
+    opt:
+      - paths=source_relative
+      - simple
+managed:
+  enabled: true
+  override:
+    - file_option: go_package_prefix
+      value: rahulxf.com/rpc-learning/gen
+  disable:
+    - file_option: go_package
+      module: buf.build/bufbuild/protovalidate
