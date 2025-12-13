@@ -1,40 +1,104 @@
-package main
+package server
 
 import (
 	"context"
-	"net/http"
+	"fmt"
 	todov1 "rahulxf.com/rpc-learning/gen/todo/v1"
-	todov1connect "rahulxf.com/rpc-learning/gen/todo/v1/todov1connect"
-	"time"
+	"rahulxf.com/rpc-learning/internal/repository"
 )
 
 type TodoServer struct {
+	repo *repository.TodoRepository
 }
 
-func (s *TodoServer) CreateTodo(_ context.Context, req *todov1.CreateTodoRequest) (*todov1.CreateTodoResponse, error) {
-	res := &todov1.CreateTodoResponse{
-		Todo: &todov1.Todo{
-			Id:          "generated-id", // could be UUID
-			Title:       req.Title,
-			Description: req.Description,
-			Completed:   false,
-			CreatedAt:   time.Now().Unix(),
-		},
-	}
-	return res, nil
+func NewTodoServer(repo *repository.TodoRepository) *TodoServer {
+	return &TodoServer{repo: repo}
 }
 
-func (s *TodoServer) GetTodo(_ context.Context, req *todov1.GetTodoRequest) (*todov1.GetTodoResponse, error) {
-	res := &todov1.GetTodoResponse{
-		Todo: &todov1.Todo{
-			Id:          "hello",
-			Title:       "Hello rahulxf",
-			Description: "hello rahulxf is good",
-			Completed:   false,
-			CreatedAt:   time.Now().Unix(),
-		},
+func (s *TodoServer) CreateTodo(ctx context.Context, req *todov1.CreateTodoRequest) (*todov1.CreateTodoResponse, error) {
+	if req.Title == "" {
+		return nil, fmt.Errorf("title is required")
 	}
-	return res, nil
+	todo, err := s.repo.Create(ctx, req.Title, req.Description)
+	if err != nil {
+		return nil, err
+	}
+
+	return &todov1.CreateTodoResponse{
+		Todo: &todov1.Todo{
+			Id:          todo.ID.Hex(),
+			Title:       todo.Title,
+			Description: todo.Description,
+			Completed:   todo.Completed,
+			CreatedAt:   todo.CreatedAt,
+			UpdatedAt:   todo.UpdatedAt,
+		},
+	}, nil
+}
+
+func (s *TodoServer) GetTodo(ctx context.Context, req *todov1.GetTodoRequest) (*todov1.GetTodoResponse, error) {
+	if req.Id == "" {
+		return nil, fmt.Errorf("id is required")
+	}
+
+	todo, err := s.repo.GetByID(ctx, req.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	return &todov1.GetTodoResponse{
+		Todo: &todov1.Todo{
+			Id:          todo.ID.Hex(),
+			Title:       todo.Title,
+			Description: todo.Description,
+			Completed:   todo.Completed,
+			CreatedAt:   todo.CreatedAt,
+			UpdatedAt:   todo.UpdatedAt,
+		},
+	}, nil
+}
+
+func (s *TodoServer) UpdateTodo(ctx context.Context, req *todov1.UpdateTodoRequest) (*todov1.UpdateTodoResponse, error) {
+	if req.Id == "" {
+		return nil, fmt.Errorf("id is required")
+	}
+
+	err := s.repo.Update(ctx, req.Id, req.Completed)
+	if err != nil {
+		return nil, err
+	}
+
+	// Fetch updated todo
+	todo, err := s.repo.GetByID(ctx, req.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	return &todov1.UpdateTodoResponse{
+		Todo: &todov1.Todo{
+			Id:          todo.ID.Hex(),
+			Title:       todo.Title,
+			Description: todo.Description,
+			Completed:   todo.Completed,
+			CreatedAt:   todo.CreatedAt,
+			UpdatedAt:   todo.UpdatedAt,
+		},
+	}, nil
+}
+
+func (s *TodoServer) DeleteTodo(ctx context.Context, req *todov1.DeleteTodoRequest) (*todov1.DeleteTodoResponse, error) {
+	if req.Id == "" {
+		return nil, fmt.Errorf("id is required")
+	}
+
+	err := s.repo.Delete(ctx, req.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	return &todov1.DeleteTodoResponse{
+		Success: true,
+	}, nil
 }
 
 func (s *TodoServer) ListTodo(context.Context, *todov1.ListTodoRequest) (*todov1.ListTodoResponse, error) {
@@ -46,19 +110,19 @@ func (s *TodoServer) ListTodo(context.Context, *todov1.ListTodoRequest) (*todov1
 	return res, nil
 }
 
-func main() {
-	todo := &TodoServer{}
-	mux := http.NewServeMux()
-
-	path, handler := todov1connect.NewTodoServiceHandler(todo)
-	mux.Handle(path, handler)
-	p := new(http.Protocols)
-	p.SetHTTP1(true)
-	p.SetUnencryptedHTTP2(true)
-	s := http.Server{
-		Addr:      "localhost:8080",
-		Handler:   mux,
-		Protocols: p,
-	}
-	s.ListenAndServe()
-}
+//func main() {
+//	todo := &TodoServer{}
+//	mux := http.NewServeMux()
+//
+//	path, handler := todov1connect.NewTodoServiceHandler(todo)
+//	mux.Handle(path, handler)
+//	p := new(http.Protocols)
+//	p.SetHTTP1(true)
+//	p.SetUnencryptedHTTP2(true)
+//	s := http.Server{
+//		Addr:      "localhost:8080",
+//		Handler:   mux,
+//		Protocols: p,
+//	}
+//	s.ListenAndServe()
+//}

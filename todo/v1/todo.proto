@@ -10,11 +10,15 @@ message Todo {
   string description = 3;
   bool completed = 4;
   int64 created_at = 5;
+  int64 updated_at = 6;
 }
+
 service TodoService {
   rpc CreateTodo(CreateTodoRequest) returns (CreateTodoResponse);
   rpc GetTodo(GetTodoRequest) returns (GetTodoResponse);
   rpc ListTodo(ListTodoRequest) returns (ListTodoResponse);
+  rpc UpdateTodo(UpdateTodoRequest) returns (UpdateTodoResponse);
+  rpc DeleteTodo(DeleteTodoRequest) returns (DeleteTodoResponse);
 }
 
 message CreateTodoRequest {
@@ -40,6 +44,23 @@ message ListTodoRequest {
 }
 
 message ListTodoResponse {
-    repeated Todo todos =1 ;
+  repeated Todo todos =1 ;
   string next_page_token = 2;
+}
+
+message UpdateTodoRequest {
+  string id = 1;
+  bool completed = 2;
+}
+
+message UpdateTodoResponse {
+  Todo todo = 1;
+}
+
+message DeleteTodoRequest {
+  string id = 1;
+}
+
+message DeleteTodoResponse {
+  bool success = 1;
 }

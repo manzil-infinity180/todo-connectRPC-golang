@@ -8,3 +8,12 @@ grpc-connectRpc (main) $ go install google.golang.org/protobuf/cmd/protoc-gen-go
 ```md
 buf config init
 ```
+
+```md 
+grpc-connectRpc (main) $ curl \
+> --header "Content-Type: application/json" \
+> --data '{"title":"Hello babu", "description":"teri to"}' \
+> http://localhost:8080/todo.v1.TodoService/CreateTodo
+
+{"todo":{"id":"generated-id","title":"Hello babu","description":"hello bhai kaise hoo","createdAt":"1765314586"}}
+```
