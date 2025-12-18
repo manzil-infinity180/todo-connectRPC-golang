@@ -3,7 +3,8 @@ package server
 import (
 	"context"
 	"fmt"
-	todov1 "rahulxf.com/rpc-learning/gen/todo/v1"
+	todov1 "rahulxf.com/rpc-learning/internal/gen/go/todo/v1"
+
 	"rahulxf.com/rpc-learning/internal/repository"
 )
 
@@ -109,20 +110,3 @@ func (s *TodoServer) ListTodo(context.Context, *todov1.ListTodoRequest) (*todov1
 
 	return res, nil
 }
-
-//func main() {
-//	todo := &TodoServer{}
-//	mux := http.NewServeMux()
-//
-//	path, handler := todov1connect.NewTodoServiceHandler(todo)
-//	mux.Handle(path, handler)
-//	p := new(http.Protocols)
-//	p.SetHTTP1(true)
-//	p.SetUnencryptedHTTP2(true)
-//	s := http.Server{
-//		Addr:      "localhost:8080",
-//		Handler:   mux,
-//		Protocols: p,
-//	}
-//	s.ListenAndServe()
-//}

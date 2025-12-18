@@ -4,8 +4,8 @@ import (
 	"context"
 	"log"
 	"net/http"
-	todov1 "rahulxf.com/rpc-learning/gen/todo/v1"
-	"rahulxf.com/rpc-learning/gen/todo/v1/todov1connect"
+	todov1 "rahulxf.com/rpc-learning/internal/gen/go/todo/v1"
+	"rahulxf.com/rpc-learning/internal/gen/go/todo/v1/todov1connect"
 )
 
 func main() {

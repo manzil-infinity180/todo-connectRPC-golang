@@ -2,15 +2,18 @@ syntax = "proto3";
 
 package todo.v1;
 
-option go_package = "rahulxf.com/rpc-learning/gen/go/todo/v1;todov1";
+option go_package = "rahulxf.com/rpc-learning/internal/gen/go/todo/v1;todov1";
 
 message Todo {
   string id = 1;
-  string title = 2;
-  string description = 3;
-  bool completed = 4;
-  int64 created_at = 5;
-  int64 updated_at = 6;
+  string workspace_id = 2;
+  string title = 3;
+  string description = 4;
+  bool completed = 5;
+  string created_by = 6;
+  string assigned_to = 7;
+  int64 created_at = 8;
+  int64 updated_at = 9;
 }
 
 service TodoService {
@@ -22,8 +25,10 @@ service TodoService {
 }
 
 message CreateTodoRequest {
-  string title = 1;
-  string description = 2;
+  string workspace_id = 1;
+  string title = 2;
+  string description = 3;
+  optional string assigned_to = 4;
 }
 
 message CreateTodoResponse {
@@ -32,6 +37,7 @@ message CreateTodoResponse {
 
 message GetTodoRequest {
   string id = 1;
+  string workspace_id = 2;
 }
 
 message GetTodoResponse {
@@ -39,18 +45,25 @@ message GetTodoResponse {
 }
 
 message ListTodoRequest {
-  int32 page_size = 1;
-  string page_token = 2;
+  string workspace_id = 1;
+  int32 page_size = 2;
+  string page_token = 3;
+  optional bool completed = 4;
+  optional string assigned_to = 5;
 }
 
 message ListTodoResponse {
-  repeated Todo todos =1 ;
+  repeated Todo todos = 1;
   string next_page_token = 2;
 }
 
 message UpdateTodoRequest {
   string id = 1;
-  bool completed = 2;
+  string workspace_id = 2;
+  optional bool completed = 3;
+  optional string title = 4;
+  optional string description = 5;
+  optional string assigned_to = 6;
 }
 
 message UpdateTodoResponse {
@@ -59,6 +72,7 @@ message UpdateTodoResponse {
 
 message DeleteTodoRequest {
   string id = 1;
+  string workspace_id = 2;
 }
 
 message DeleteTodoResponse {

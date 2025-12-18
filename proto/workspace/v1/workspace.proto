@@ -1,0 +1,128 @@
+syntax = "proto3";
+
+package workspace.v1;
+option go_package = "rahulxf.com/rpc-learning/internal/gen/go/workspace/v1;workspacev1";
+
+
+service WorkspaceService {
+  rpc CreateWorkspace(CreateWorkspaceRequest) returns (CreateWorkspaceResponse);
+  rpc GetWorkspace(GetWorkspaceRequest) returns (GetWorkspaceResponse);
+  rpc ListWorkspaces(ListWorkspacesRequest) returns (ListWorkspacesResponse);
+  rpc UpdateWorkspace(UpdateWorkspaceRequest) returns (UpdateWorkspaceResponse);
+  rpc DeleteWorkspace(DeleteWorkspaceRequest) returns (DeleteWorkspaceResponse);
+  rpc AddMember(AddMemberRequest) returns (AddMemberResponse);
+  rpc RemoveMember(RemoveMemberRequest) returns (RemoveMemberResponse);
+  rpc UpdateMemberRole(UpdateMemberRoleRequest) returns (UpdateMemberRoleResponse);
+  rpc ListMembers(ListMembersRequest) returns (ListMembersResponse);
+
+}
+
+message Workspace {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+  string owner_id = 4;
+  int64 created_at = 5;
+  int64 updated_at = 6;
+}
+
+message WorkspaceMember {
+  string id = 1;
+  string workspace_id = 2;
+  string user_id = 3;
+  MemberRole role = 4;
+  int64 joined_at = 5;
+}
+
+enum MemberRole {
+  MEMBER_ROLE_UNSPECIFIED = 0;
+  MEMBER_ROLE_OWNER = 1;
+  MEMBER_ROLE_ADMIN = 2;
+  MEMBER_ROLE_MEMBER = 3;
+  MEMBER_ROLE_VIEWER = 4;
+}
+
+message CreateWorkspaceRequest {
+  string name = 1;
+  string description = 2;
+}
+
+message CreateWorkspaceResponse {
+  Workspace workspace = 1;
+}
+
+message GetWorkspaceRequest {
+  string id = 1;
+}
+
+message GetWorkspaceResponse {
+  Workspace workspace = 1;
+}
+
+message ListWorkspacesRequest {
+  int32 page_size = 1;
+  string page_token = 2;
+}
+
+message ListWorkspacesResponse {
+  repeated Workspace workspaces = 1;
+  string next_page_token = 2;
+}
+
+message UpdateWorkspaceRequest {
+  string id = 1;
+  optional string name = 2;
+  optional string description = 3;
+}
+
+message UpdateWorkspaceResponse {
+  Workspace workspace = 1;
+}
+
+message DeleteWorkspaceRequest {
+  string id = 1;
+}
+
+message DeleteWorkspaceResponse {
+  bool success = 1;
+}
+
+message AddMemberRequest {
+  string workspace_id = 1;
+  string user_email = 2;
+  MemberRole role = 3;
+}
+
+message AddMemberResponse {
+  WorkspaceMember member = 1;
+}
+
+message RemoveMemberRequest {
+  string workspace_id = 1;
+  string user_id = 2;
+}
+
+message RemoveMemberResponse {
+  bool success = 1;
+}
+
+message UpdateMemberRoleRequest {
+  string workspace_id = 1;
+  string user_id = 2;
+  MemberRole role = 3;
+}
+
+message UpdateMemberRoleResponse {
+  WorkspaceMember member = 1;
+}
+
+message ListMembersRequest {
+  string workspace_id = 1;
+  int32 page_size = 2;
+  string page_token = 3;
+}
+
+message ListMembersResponse {
+  repeated WorkspaceMember members = 1;
+  string next_page_token = 2;
+}

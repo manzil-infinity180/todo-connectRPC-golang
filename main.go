@@ -6,8 +6,9 @@ import (
 	"net/http"
 	"os"
 	"rahulxf.com/rpc-learning/cmd/server"
-	"rahulxf.com/rpc-learning/gen/todo/v1/todov1connect"
 	"rahulxf.com/rpc-learning/internal/db"
+	"rahulxf.com/rpc-learning/internal/gen/go/todo/v1/todov1connect"
+
 	"rahulxf.com/rpc-learning/internal/repository"
 )
 

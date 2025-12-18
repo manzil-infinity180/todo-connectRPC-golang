@@ -9,7 +9,7 @@ import (
 	context "context"
 	errors "errors"
 	http "net/http"
-	v1 "rahulxf.com/rpc-learning/gen/user/v1"
+	v1 "rahulxf.com/rpc-learning/internal/gen/go/user/v1"
 	strings "strings"
 )
 
