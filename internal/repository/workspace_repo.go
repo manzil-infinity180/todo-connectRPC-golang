@@ -97,3 +97,42 @@ func (r *WorkspaceRepository) AddMember(ctx context.Context, workspaceID, userID
 
 	return member, nil
 }
+
+func (r *WorkspaceRepository) ListByUserID(ctx context.Context, userID string) ([]*models.WorkspaceDocument, error) {
+	userObjectID, err := bson.ObjectIDFromHex(userID)
+	if err != nil {
+		return nil, fmt.Errorf("invalid user id: %w", err)
+	}
+
+	// Find all workspace memberships for user
+	cursor, err := r.memberCollection.Find(ctx, bson.M{"user_id": userObjectID})
+	if err != nil {
+		return nil, fmt.Errorf("failed to find memberships: %w", err)
+	}
+	defer cursor.Close(ctx)
+
+	var members []models.WorkspaceMemberDocument
+	if err := cursor.All(ctx, &members); err != nil {
+		return nil, fmt.Errorf("failed to decode memberships: %w", err)
+	}
+
+	// Get workspace IDs
+	workspaceIDs := make([]bson.ObjectID, len(members))
+	for i, member := range members {
+		workspaceIDs[i] = member.WorkspaceID
+	}
+
+	// Find all workspaces
+	cursor, err = r.workspaceCollection.Find(ctx, bson.M{"_id": bson.M{"$in": workspaceIDs}})
+	if err != nil {
+		return nil, fmt.Errorf("failed to find workspaces: %w", err)
+	}
+	defer cursor.Close(ctx)
+
+	var workspaces []*models.WorkspaceDocument
+	if err := cursor.All(ctx, &workspaces); err != nil {
+		return nil, fmt.Errorf("failed to decode workspaces: %w", err)
+	}
+
+	return workspaces, nil
+}
