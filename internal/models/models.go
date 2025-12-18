@@ -10,6 +10,7 @@ type TodoDocument struct {
 	Description string         `bson:"description"`
 	Completed   bool           `bson:"completed"`
 	CreatedAt   int64          `bson:"created_at"`
+	CreatedBy   bson.ObjectID  `bson:"created_by"`
 	UpdatedAt   int64          `bson:"updated_at"`
 	WorkspaceID bson.ObjectID  `bson:"workspace_id"`
 	AssignedTo  *bson.ObjectID `bson:"assigned_to,omitempty"`

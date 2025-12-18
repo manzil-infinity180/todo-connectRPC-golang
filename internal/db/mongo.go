@@ -39,3 +39,15 @@ func (m *MongoDB) Disconnect() error {
 func (m *MongoDB) TodoCollection() *mongo.Collection {
 	return m.DB.Collection("todos")
 }
+
+func (m *MongoDB) UserCollection() *mongo.Collection {
+	return m.DB.Collection("users")
+}
+
+func (m *MongoDB) WorkspaceCollection() *mongo.Collection {
+	return m.DB.Collection("workspaces")
+}
+
+func (m *MongoDB) WorkspaceMemberCollection() *mongo.Collection {
+	return m.DB.Collection("workspace_members")
+}

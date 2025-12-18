@@ -24,11 +24,14 @@ const (
 type Todo struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Title         string                 `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
-	Description   string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
-	Completed     bool                   `protobuf:"varint,4,opt,name=completed,proto3" json:"completed,omitempty"`
-	CreatedAt     int64                  `protobuf:"varint,5,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	UpdatedAt     int64                  `protobuf:"varint,6,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	WorkspaceId   string                 `protobuf:"bytes,2,opt,name=workspace_id,json=workspaceId,proto3" json:"workspace_id,omitempty"`
+	Title         string                 `protobuf:"bytes,3,opt,name=title,proto3" json:"title,omitempty"`
+	Description   string                 `protobuf:"bytes,4,opt,name=description,proto3" json:"description,omitempty"`
+	Completed     bool                   `protobuf:"varint,5,opt,name=completed,proto3" json:"completed,omitempty"`
+	CreatedBy     string                 `protobuf:"bytes,6,opt,name=created_by,json=createdBy,proto3" json:"created_by,omitempty"`
+	AssignedTo    string                 `protobuf:"bytes,7,opt,name=assigned_to,json=assignedTo,proto3" json:"assigned_to,omitempty"`
+	CreatedAt     int64                  `protobuf:"varint,8,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt     int64                  `protobuf:"varint,9,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -70,6 +73,13 @@ func (x *Todo) GetId() string {
 	return ""
 }
 
+func (x *Todo) GetWorkspaceId() string {
+	if x != nil {
+		return x.WorkspaceId
+	}
+	return ""
+}
+
 func (x *Todo) GetTitle() string {
 	if x != nil {
 		return x.Title
@@ -91,6 +101,20 @@ func (x *Todo) GetCompleted() bool {
 	return false
 }
 
+func (x *Todo) GetCreatedBy() string {
+	if x != nil {
+		return x.CreatedBy
+	}
+	return ""
+}
+
+func (x *Todo) GetAssignedTo() string {
+	if x != nil {
+		return x.AssignedTo
+	}
+	return ""
+}
+
 func (x *Todo) GetCreatedAt() int64 {
 	if x != nil {
 		return x.CreatedAt
@@ -107,8 +131,10 @@ func (x *Todo) GetUpdatedAt() int64 {
 
 type CreateTodoRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Title         string                 `protobuf:"bytes,1,opt,name=title,proto3" json:"title,omitempty"`
-	Description   string                 `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`
+	WorkspaceId   string                 `protobuf:"bytes,1,opt,name=workspace_id,json=workspaceId,proto3" json:"workspace_id,omitempty"`
+	Title         string                 `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
+	Description   string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
+	AssignedTo    *string                `protobuf:"bytes,4,opt,name=assigned_to,json=assignedTo,proto3,oneof" json:"assigned_to,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -143,6 +169,13 @@ func (*CreateTodoRequest) Descriptor() ([]byte, []int) {
 	return file_todo_v1_todo_proto_rawDescGZIP(), []int{1}
 }
 
+func (x *CreateTodoRequest) GetWorkspaceId() string {
+	if x != nil {
+		return x.WorkspaceId
+	}
+	return ""
+}
+
 func (x *CreateTodoRequest) GetTitle() string {
 	if x != nil {
 		return x.Title
@@ -153,6 +186,13 @@ func (x *CreateTodoRequest) GetTitle() string {
 func (x *CreateTodoRequest) GetDescription() string {
 	if x != nil {
 		return x.Description
+	}
+	return ""
+}
+
+func (x *CreateTodoRequest) GetAssignedTo() string {
+	if x != nil && x.AssignedTo != nil {
+		return *x.AssignedTo
 	}
 	return ""
 }
@@ -204,6 +244,7 @@ func (x *CreateTodoResponse) GetTodo() *Todo {
 type GetTodoRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	WorkspaceId   string                 `protobuf:"bytes,2,opt,name=workspace_id,json=workspaceId,proto3" json:"workspace_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -241,6 +282,13 @@ func (*GetTodoRequest) Descriptor() ([]byte, []int) {
 func (x *GetTodoRequest) GetId() string {
 	if x != nil {
 		return x.Id
+	}
+	return ""
+}
+
+func (x *GetTodoRequest) GetWorkspaceId() string {
+	if x != nil {
+		return x.WorkspaceId
 	}
 	return ""
 }
@@ -291,8 +339,11 @@ func (x *GetTodoResponse) GetTodo() *Todo {
 
 type ListTodoRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	PageSize      int32                  `protobuf:"varint,1,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
-	PageToken     string                 `protobuf:"bytes,2,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
+	WorkspaceId   string                 `protobuf:"bytes,1,opt,name=workspace_id,json=workspaceId,proto3" json:"workspace_id,omitempty"`
+	PageSize      int32                  `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	PageToken     string                 `protobuf:"bytes,3,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
+	Completed     *bool                  `protobuf:"varint,4,opt,name=completed,proto3,oneof" json:"completed,omitempty"`
+	AssignedTo    *string                `protobuf:"bytes,5,opt,name=assigned_to,json=assignedTo,proto3,oneof" json:"assigned_to,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -327,6 +378,13 @@ func (*ListTodoRequest) Descriptor() ([]byte, []int) {
 	return file_todo_v1_todo_proto_rawDescGZIP(), []int{5}
 }
 
+func (x *ListTodoRequest) GetWorkspaceId() string {
+	if x != nil {
+		return x.WorkspaceId
+	}
+	return ""
+}
+
 func (x *ListTodoRequest) GetPageSize() int32 {
 	if x != nil {
 		return x.PageSize
@@ -337,6 +395,20 @@ func (x *ListTodoRequest) GetPageSize() int32 {
 func (x *ListTodoRequest) GetPageToken() string {
 	if x != nil {
 		return x.PageToken
+	}
+	return ""
+}
+
+func (x *ListTodoRequest) GetCompleted() bool {
+	if x != nil && x.Completed != nil {
+		return *x.Completed
+	}
+	return false
+}
+
+func (x *ListTodoRequest) GetAssignedTo() string {
+	if x != nil && x.AssignedTo != nil {
+		return *x.AssignedTo
 	}
 	return ""
 }
@@ -396,7 +468,11 @@ func (x *ListTodoResponse) GetNextPageToken() string {
 type UpdateTodoRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Completed     bool                   `protobuf:"varint,2,opt,name=completed,proto3" json:"completed,omitempty"`
+	WorkspaceId   string                 `protobuf:"bytes,2,opt,name=workspace_id,json=workspaceId,proto3" json:"workspace_id,omitempty"`
+	Completed     *bool                  `protobuf:"varint,3,opt,name=completed,proto3,oneof" json:"completed,omitempty"`
+	Title         *string                `protobuf:"bytes,4,opt,name=title,proto3,oneof" json:"title,omitempty"`
+	Description   *string                `protobuf:"bytes,5,opt,name=description,proto3,oneof" json:"description,omitempty"`
+	AssignedTo    *string                `protobuf:"bytes,6,opt,name=assigned_to,json=assignedTo,proto3,oneof" json:"assigned_to,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -438,11 +514,39 @@ func (x *UpdateTodoRequest) GetId() string {
 	return ""
 }
 
-func (x *UpdateTodoRequest) GetCompleted() bool {
+func (x *UpdateTodoRequest) GetWorkspaceId() string {
 	if x != nil {
-		return x.Completed
+		return x.WorkspaceId
+	}
+	return ""
+}
+
+func (x *UpdateTodoRequest) GetCompleted() bool {
+	if x != nil && x.Completed != nil {
+		return *x.Completed
 	}
 	return false
+}
+
+func (x *UpdateTodoRequest) GetTitle() string {
+	if x != nil && x.Title != nil {
+		return *x.Title
+	}
+	return ""
+}
+
+func (x *UpdateTodoRequest) GetDescription() string {
+	if x != nil && x.Description != nil {
+		return *x.Description
+	}
+	return ""
+}
+
+func (x *UpdateTodoRequest) GetAssignedTo() string {
+	if x != nil && x.AssignedTo != nil {
+		return *x.AssignedTo
+	}
+	return ""
 }
 
 type UpdateTodoResponse struct {
@@ -492,6 +596,7 @@ func (x *UpdateTodoResponse) GetTodo() *Todo {
 type DeleteTodoRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	WorkspaceId   string                 `protobuf:"bytes,2,opt,name=workspace_id,json=workspaceId,proto3" json:"workspace_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -529,6 +634,13 @@ func (*DeleteTodoRequest) Descriptor() ([]byte, []int) {
 func (x *DeleteTodoRequest) GetId() string {
 	if x != nil {
 		return x.Id
+	}
+	return ""
+}
+
+func (x *DeleteTodoRequest) GetWorkspaceId() string {
+	if x != nil {
+		return x.WorkspaceId
 	}
 	return ""
 }
@@ -581,39 +693,67 @@ var File_todo_v1_todo_proto protoreflect.FileDescriptor
 
 const file_todo_v1_todo_proto_rawDesc = "" +
 	"\n" +
-	"\x12todo/v1/todo.proto\x12\atodo.v1\"\xaa\x01\n" +
+	"\x12todo/v1/todo.proto\x12\atodo.v1\"\x8d\x02\n" +
 	"\x04Todo\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\x12\x14\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12!\n" +
+	"\fworkspace_id\x18\x02 \x01(\tR\vworkspaceId\x12\x14\n" +
+	"\x05title\x18\x03 \x01(\tR\x05title\x12 \n" +
+	"\vdescription\x18\x04 \x01(\tR\vdescription\x12\x1c\n" +
+	"\tcompleted\x18\x05 \x01(\bR\tcompleted\x12\x1d\n" +
+	"\n" +
+	"created_by\x18\x06 \x01(\tR\tcreatedBy\x12\x1f\n" +
+	"\vassigned_to\x18\a \x01(\tR\n" +
+	"assignedTo\x12\x1d\n" +
+	"\n" +
+	"created_at\x18\b \x01(\x03R\tcreatedAt\x12\x1d\n" +
+	"\n" +
+	"updated_at\x18\t \x01(\x03R\tupdatedAt\"\xa4\x01\n" +
+	"\x11CreateTodoRequest\x12!\n" +
+	"\fworkspace_id\x18\x01 \x01(\tR\vworkspaceId\x12\x14\n" +
 	"\x05title\x18\x02 \x01(\tR\x05title\x12 \n" +
-	"\vdescription\x18\x03 \x01(\tR\vdescription\x12\x1c\n" +
-	"\tcompleted\x18\x04 \x01(\bR\tcompleted\x12\x1d\n" +
-	"\n" +
-	"created_at\x18\x05 \x01(\x03R\tcreatedAt\x12\x1d\n" +
-	"\n" +
-	"updated_at\x18\x06 \x01(\x03R\tupdatedAt\"K\n" +
-	"\x11CreateTodoRequest\x12\x14\n" +
-	"\x05title\x18\x01 \x01(\tR\x05title\x12 \n" +
-	"\vdescription\x18\x02 \x01(\tR\vdescription\"7\n" +
+	"\vdescription\x18\x03 \x01(\tR\vdescription\x12$\n" +
+	"\vassigned_to\x18\x04 \x01(\tH\x00R\n" +
+	"assignedTo\x88\x01\x01B\x0e\n" +
+	"\f_assigned_to\"7\n" +
 	"\x12CreateTodoResponse\x12!\n" +
-	"\x04todo\x18\x01 \x01(\v2\r.todo.v1.TodoR\x04todo\" \n" +
+	"\x04todo\x18\x01 \x01(\v2\r.todo.v1.TodoR\x04todo\"C\n" +
 	"\x0eGetTodoRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\"4\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12!\n" +
+	"\fworkspace_id\x18\x02 \x01(\tR\vworkspaceId\"4\n" +
 	"\x0fGetTodoResponse\x12!\n" +
-	"\x04todo\x18\x01 \x01(\v2\r.todo.v1.TodoR\x04todo\"M\n" +
-	"\x0fListTodoRequest\x12\x1b\n" +
-	"\tpage_size\x18\x01 \x01(\x05R\bpageSize\x12\x1d\n" +
+	"\x04todo\x18\x01 \x01(\v2\r.todo.v1.TodoR\x04todo\"\xd7\x01\n" +
+	"\x0fListTodoRequest\x12!\n" +
+	"\fworkspace_id\x18\x01 \x01(\tR\vworkspaceId\x12\x1b\n" +
+	"\tpage_size\x18\x02 \x01(\x05R\bpageSize\x12\x1d\n" +
 	"\n" +
-	"page_token\x18\x02 \x01(\tR\tpageToken\"_\n" +
+	"page_token\x18\x03 \x01(\tR\tpageToken\x12!\n" +
+	"\tcompleted\x18\x04 \x01(\bH\x00R\tcompleted\x88\x01\x01\x12$\n" +
+	"\vassigned_to\x18\x05 \x01(\tH\x01R\n" +
+	"assignedTo\x88\x01\x01B\f\n" +
+	"\n" +
+	"_completedB\x0e\n" +
+	"\f_assigned_to\"_\n" +
 	"\x10ListTodoResponse\x12#\n" +
 	"\x05todos\x18\x01 \x03(\v2\r.todo.v1.TodoR\x05todos\x12&\n" +
-	"\x0fnext_page_token\x18\x02 \x01(\tR\rnextPageToken\"A\n" +
+	"\x0fnext_page_token\x18\x02 \x01(\tR\rnextPageToken\"\x89\x02\n" +
 	"\x11UpdateTodoRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1c\n" +
-	"\tcompleted\x18\x02 \x01(\bR\tcompleted\"7\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12!\n" +
+	"\fworkspace_id\x18\x02 \x01(\tR\vworkspaceId\x12!\n" +
+	"\tcompleted\x18\x03 \x01(\bH\x00R\tcompleted\x88\x01\x01\x12\x19\n" +
+	"\x05title\x18\x04 \x01(\tH\x01R\x05title\x88\x01\x01\x12%\n" +
+	"\vdescription\x18\x05 \x01(\tH\x02R\vdescription\x88\x01\x01\x12$\n" +
+	"\vassigned_to\x18\x06 \x01(\tH\x03R\n" +
+	"assignedTo\x88\x01\x01B\f\n" +
+	"\n" +
+	"_completedB\b\n" +
+	"\x06_titleB\x0e\n" +
+	"\f_descriptionB\x0e\n" +
+	"\f_assigned_to\"7\n" +
 	"\x12UpdateTodoResponse\x12!\n" +
-	"\x04todo\x18\x01 \x01(\v2\r.todo.v1.TodoR\x04todo\"#\n" +
+	"\x04todo\x18\x01 \x01(\v2\r.todo.v1.TodoR\x04todo\"F\n" +
 	"\x11DeleteTodoRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\".\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12!\n" +
+	"\fworkspace_id\x18\x02 \x01(\tR\vworkspaceId\".\n" +
 	"\x12DeleteTodoResponse\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccess2\xe1\x02\n" +
 	"\vTodoService\x12E\n" +
@@ -680,6 +820,9 @@ func file_todo_v1_todo_proto_init() {
 	if File_todo_v1_todo_proto != nil {
 		return
 	}
+	file_todo_v1_todo_proto_msgTypes[1].OneofWrappers = []any{}
+	file_todo_v1_todo_proto_msgTypes[5].OneofWrappers = []any{}
+	file_todo_v1_todo_proto_msgTypes[7].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
