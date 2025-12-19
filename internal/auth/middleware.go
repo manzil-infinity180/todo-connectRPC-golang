@@ -81,3 +81,17 @@ func (i *AuthInterceptor) extractToken(header http.Header) (string, error) {
 
 	return "", fmt.Errorf("token not found")
 }
+
+// Client-side streaming (not used, but required)
+func (i *AuthInterceptor) WrapStreamingClient(
+	next connect.StreamingClientFunc,
+) connect.StreamingClientFunc {
+	return next
+}
+
+// Server-side streaming (not used, but required)
+func (i *AuthInterceptor) WrapStreamingHandler(
+	next connect.StreamingHandlerFunc,
+) connect.StreamingHandlerFunc {
+	return next
+}

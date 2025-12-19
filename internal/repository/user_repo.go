@@ -60,6 +60,24 @@ func (r *UserRepository) GetByEmail(ctx context.Context, email string) (*models.
 	return &user, nil
 }
 
+func (r *UserRepository) GetByID(ctx context.Context, id string) (*models.UserDocument, error) {
+	objectID, err := bson.ObjectIDFromHex(id)
+	if err != nil {
+		return nil, fmt.Errorf("invalid id format: %w", err)
+	}
+
+	var user models.UserDocument
+	err = r.collection.FindOne(ctx, bson.M{"_id": objectID}).Decode(&user)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return nil, fmt.Errorf("user not found")
+		}
+		return nil, fmt.Errorf("failed to get user: %w", err)
+	}
+
+	return &user, nil
+}
+
 func (r *UserRepository) ComparePassword(ctx context.Context, email, password string) (*models.UserDocument, error) {
 	user, err := r.GetByEmail(ctx, email)
 	if err != nil {

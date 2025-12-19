@@ -1,112 +1,97 @@
-package server
+package main
 
 import (
-	"context"
-	"fmt"
-	todov1 "rahulxf.com/rpc-learning/internal/gen/go/todo/v1"
+	"log"
+	"net/http"
+	"os"
+	"time"
 
+	"connectrpc.com/connect"
+	"github.com/joho/godotenv"
+	"golang.org/x/net/http2"
+	"golang.org/x/net/http2/h2c"
+
+	"rahulxf.com/rpc-learning/internal/auth"
+	"rahulxf.com/rpc-learning/internal/db"
 	"rahulxf.com/rpc-learning/internal/repository"
+	service "rahulxf.com/rpc-learning/internal/services"
+
+	authv1connect "rahulxf.com/rpc-learning/internal/gen/go/auth/v1/authv1connect"
+	todov1connect "rahulxf.com/rpc-learning/internal/gen/go/todo/v1/todov1connect"
 )
 
-type TodoServer struct {
-	repo *repository.TodoRepository
-}
+func main() {
+	_ = godotenv.Load()
 
-func NewTodoServer(repo *repository.TodoRepository) *TodoServer {
-	return &TodoServer{repo: repo}
-}
-
-func (s *TodoServer) CreateTodo(ctx context.Context, req *todov1.CreateTodoRequest) (*todov1.CreateTodoResponse, error) {
-	if req.Title == "" {
-		return nil, fmt.Errorf("title is required")
-	}
-	todo, err := s.repo.Create(ctx, req.Title, req.Description)
+	mongodb, err := db.NewMongoDB(os.Getenv("MONGODB_URL"), "todo_db")
 	if err != nil {
-		return nil, err
+		log.Fatalf("failed to connect mongodb: %v", err)
 	}
+	defer mongodb.Disconnect()
 
-	return &todov1.CreateTodoResponse{
-		Todo: &todov1.Todo{
-			Id:          todo.ID.Hex(),
-			Title:       todo.Title,
-			Description: todo.Description,
-			Completed:   todo.Completed,
-			CreatedAt:   todo.CreatedAt,
-			UpdatedAt:   todo.UpdatedAt,
-		},
-	}, nil
+	jwtManager := auth.NewJWTManager(
+		os.Getenv("JWT_SECRET"),
+		1*time.Hour,
+		7*24*time.Hour,
+	)
+	userRepo := repository.NewUserRepository(
+		mongodb.UserCollection(),
+	)
+	workspaceRepo := repository.NewWorkspaceRepository(
+		mongodb.WorkspaceCollection(),
+		mongodb.WorkspaceMemberCollection(),
+	)
+
+	todoRepo := repository.NewTodoRepository(
+		mongodb.TodoCollection(),
+	)
+
+	authService := service.NewAuthService(
+		userRepo,
+		workspaceRepo,
+		jwtManager,
+	)
+	todoService := service.NewTodoService(
+		todoRepo,
+	)
+	authInterceptor := auth.NewAuthInterceptor(jwtManager)
+	protected := connect.WithInterceptors(authInterceptor)
+
+	mux := http.NewServeMux()
+
+	mux.Handle(
+		authv1connect.NewAuthServiceHandler(authService),
+	)
+	mux.Handle(
+		todov1connect.NewTodoServiceHandler(
+			todoService,
+			protected,
+		),
+	)
+	log.Println("Server running on http://localhost:8080")
+	if err := http.ListenAndServe(
+		":8080",
+		h2c.NewHandler(corsMiddleware(mux), &http2.Server{}),
+	); err != nil {
+		log.Fatal(err)
+	}
 }
 
-func (s *TodoServer) GetTodo(ctx context.Context, req *todov1.GetTodoRequest) (*todov1.GetTodoResponse, error) {
-	if req.Id == "" {
-		return nil, fmt.Errorf("id is required")
-	}
+func corsMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+		w.Header().Set(
+			"Access-Control-Allow-Headers",
+			"Content-Type, Authorization, Connect-Protocol-Version, Connect-Timeout-Ms",
+		)
+		w.Header().Set("Access-Control-Allow-Credentials", "true")
 
-	todo, err := s.repo.GetByID(ctx, req.Id)
-	if err != nil {
-		return nil, err
-	}
+		if r.Method == http.MethodOptions {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
 
-	return &todov1.GetTodoResponse{
-		Todo: &todov1.Todo{
-			Id:          todo.ID.Hex(),
-			Title:       todo.Title,
-			Description: todo.Description,
-			Completed:   todo.Completed,
-			CreatedAt:   todo.CreatedAt,
-			UpdatedAt:   todo.UpdatedAt,
-		},
-	}, nil
-}
-
-func (s *TodoServer) UpdateTodo(ctx context.Context, req *todov1.UpdateTodoRequest) (*todov1.UpdateTodoResponse, error) {
-	if req.Id == "" {
-		return nil, fmt.Errorf("id is required")
-	}
-
-	err := s.repo.Update(ctx, req.Id, req.Completed)
-	if err != nil {
-		return nil, err
-	}
-
-	// Fetch updated todo
-	todo, err := s.repo.GetByID(ctx, req.Id)
-	if err != nil {
-		return nil, err
-	}
-
-	return &todov1.UpdateTodoResponse{
-		Todo: &todov1.Todo{
-			Id:          todo.ID.Hex(),
-			Title:       todo.Title,
-			Description: todo.Description,
-			Completed:   todo.Completed,
-			CreatedAt:   todo.CreatedAt,
-			UpdatedAt:   todo.UpdatedAt,
-		},
-	}, nil
-}
-
-func (s *TodoServer) DeleteTodo(ctx context.Context, req *todov1.DeleteTodoRequest) (*todov1.DeleteTodoResponse, error) {
-	if req.Id == "" {
-		return nil, fmt.Errorf("id is required")
-	}
-
-	err := s.repo.Delete(ctx, req.Id)
-	if err != nil {
-		return nil, err
-	}
-
-	return &todov1.DeleteTodoResponse{
-		Success: true,
-	}, nil
-}
-
-func (s *TodoServer) ListTodo(context.Context, *todov1.ListTodoRequest) (*todov1.ListTodoResponse, error) {
-	res := &todov1.ListTodoResponse{
-		Todos:         []*todov1.Todo{},
-		NextPageToken: "",
-	}
-
-	return res, nil
+		next.ServeHTTP(w, r)
+	})
 }
